@@ -26,7 +26,8 @@ def WF(s,mu,N, G, seed = 0, p_init=0):
         p[i+1] /= np.sum(p[i+1]) # normalizing the frequency
         n = np.random.multinomial(N, p[i+1]) # sampling the number of mutants
         p[i+1] = n/N # updating the frequency of the mutant allele
-    return p
+    res = p[[10*(i+1) for i in range(G//10)], 1]
+    return res
 
 # Wright-Fisher model with frequency-dependent selection
 def WF_FD(s, mu, N, G, seed = 0, p_init=0, alpha=7):
@@ -48,7 +49,8 @@ def WF_FD(s, mu, N, G, seed = 0, p_init=0, alpha=7):
         p[i+1] /= np.sum(p[i+1]) # normalizing the frequency
         n = np.random.multinomial(N, p[i+1]) # sampling the number of mutants
         p[i+1] = n/N # updating the frequency of the mutant allele
-    return p
+    res = p[[10*(i+1) for i in range(G//10)], 1]
+    return res
 
 # Wright-Fisher model with bottleneck events
 def WF_bottleneck(s, mu, N, G, bottleneck, p_init=0, seed = 0):
@@ -76,8 +78,8 @@ def WF_bottleneck(s, mu, N, G, bottleneck, p_init=0, seed = 0):
         p[i+1] /= np.sum(p[i+1]) # normalizing the frequency
         n = np.random.multinomial(N, p[i+1]) # sampling the number of mutants
         p[i+1] = n/N # updating the frequency of the mutant allele
-    return p
-
+    res = p[[10*(i+1) for i in range(G//10)], 1]
+    return res
 # Wright-Fisher model with exponential DFE
 def WF_DFE(mu,N, G, dist, p_init=0, seed = 0):
     # s: selection coefficient
@@ -101,5 +103,5 @@ def WF_DFE(mu,N, G, dist, p_init=0, seed = 0):
         p[i+1] /= np.sum(p[i+1]) # normalizing the frequency
         n = np.random.multinomial(N, p[i+1]) # sampling the number of mutants
         p[i+1] = n/N # updating the frequency of the mutant allele
-    return p
-
+    res = p[[10*(i+1) for i in range(G//10)], 1]
+    return res
