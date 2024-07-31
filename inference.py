@@ -22,7 +22,7 @@ def simulator(theta):
     return torch.tensor(res)
 
 # inference
-posterior = infer(simulator, prior, method='SNPE', num_simulations=100000)
+posterior = infer(simulator, prior, method='SNPE', num_simulations=10000)
 
 # Save the posterior with pickle
 with open('posterior.pkl', 'wb') as f:
