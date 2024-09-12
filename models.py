@@ -30,7 +30,7 @@ def WF(s,mu,N, G, seed = 0, p_init=0):
     return res
 
 # Wright-Fisher model with frequency-dependent selection
-def WF_FD(s, mu, N, G, seed = 0, p_init=0, alpha=7):
+def WF_FD(s, mu, N, G, seed = 0, p_init=0, alpha=8):
     # s: selection coefficient
     # mu: mutation rate
     # N: population size
@@ -42,7 +42,10 @@ def WF_FD(s, mu, N, G, seed = 0, p_init=0, alpha=7):
     M = np.array([[1-mu, 0], [mu, 1]]) # mutation matrix
 
     for i in range(G): # iterating over generations
-        w = 1+alpha*s*p[i,1]*(1-p[i,1]) # fitness of the mutant allele  
+        if p[i,1] >= 0.05:
+            w = 1+alpha*s*p[i,1]*(1-p[i,1]) # fitness of the mutant allele  
+        else:
+            w = 1+s
         S = np.array([[1, 0], [0, w]]) # selection matrix
         E = S@M # evolutionary matrix
         p[i+1] = E@p[i] # updating the frequency of the mutant allele
