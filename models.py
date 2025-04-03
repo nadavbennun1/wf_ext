@@ -83,6 +83,7 @@ def WF_bottleneck(s, mu, N, G, bottleneck, p_init=0, seed = 0):
         p[i+1] = n/N # updating the frequency of the mutant allele
     res = p[[10*(i+1) for i in range(G//10)], 1]
     return res
+
 # Wright-Fisher model with exponential DFE
 def WF_DFE(mu,N, G, dist, p_init=0, seed = 0):
     # s: selection coefficient
