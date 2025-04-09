@@ -1,5 +1,5 @@
 # Training of three NDEs
-from models import WF
+from evo_models import WF
 from inference_utils import get_prior
 from sbi.inference import NPE, NLE, NRE
 from sbi.utils.user_input_checks import (
