@@ -1,3 +1,5 @@
+# Priors and DFE for WF_DFE
+
 from sbi.utils import BoxUniform
 import torch
 from scipy import stats
@@ -5,6 +7,11 @@ from scipy import stats
 # Define the prior
 def get_prior():
     prior = BoxUniform(low=torch.tensor([-3, -10]), high=torch.tensor([0, -3]))
+    return prior
+
+
+def get_prior_combined():
+    prior = BoxUniform(low=torch.tensor([-3, -10, -3, -10, -3, -10, -10]), high=torch.tensor([0, -3, 0, -3, 0, -3, -3]))
     return prior
 
 def get_dist(s):
