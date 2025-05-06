@@ -17,11 +17,9 @@ torch.autograd.set_detect_anomaly(True)
 USE_MAMBA = 1
 DIFFERENT_H_STATES_RECURRENT_UPDATE_MECHANISM = 0
 
-device = torch.device('cuda:1' if torch.cuda.is_available() else 'cpu')
-
 
 class S6(nn.Module):
-    def __init__(self, seq_len, d_model, state_size, device):
+    def __init__(self, seq_len, d_model, state_size, batch_size, device):
         # d_model: model dimension (D/channels in paper)
         # seq_len: data length (20/40)
         super(S6, self).__init__()
@@ -33,20 +31,20 @@ class S6(nn.Module):
         self.seq_len = seq_len
         self.d_model = d_model
         self.state_size = state_size
-        
+        self.batch_size = batch_size
         self.A = nn.Parameter(F.normalize(torch.ones(d_model, state_size, device=device), p=2, dim=-1))
         nn.init.xavier_uniform_(self.A)
 
-        self.B = torch.zeros(batch_size, self.seq_len, self.state_size, device=device)
-        self.C = torch.zeros(batch_size, self.seq_len, self.state_size, device=device)
+        self.B = torch.zeros(self.batch_size, self.seq_len, self.state_size, device=device)
+        self.C = torch.zeros(self.batch_size, self.seq_len, self.state_size, device=device)
 
-        self.delta = torch.zeros(batch_size, self.seq_len, self.d_model, device=device)
-        self.dA = torch.zeros(batch_size, self.seq_len, self.d_model, self.state_size, device=device)
-        self.dB = torch.zeros(batch_size, self.seq_len, self.d_model, self.state_size, device=device)
+        self.delta = torch.zeros(self.batch_size, self.seq_len, self.d_model, device=device)
+        self.dA = torch.zeros(self.batch_size, self.seq_len, self.d_model, self.state_size, device=device)
+        self.dB = torch.zeros(self.batch_size, self.seq_len, self.d_model, self.state_size, device=device)
 
         # h should have dimensions [batch_size, seq_len, d_model, state_size]
-        self.h = torch.zeros(batch_size, self.seq_len, self.d_model, self.state_size, device=device)
-        self.y = torch.zeros(batch_size, self.seq_len, self.d_model, device=device)
+        self.h = torch.zeros(self.batch_size, self.seq_len, self.d_model, self.state_size, device=device)
+        self.y = torch.zeros(self.batch_size, self.seq_len, self.d_model, device=device)
 
     def discretization(self):
 
@@ -77,7 +75,7 @@ class S6(nn.Module):
 
 
 class MambaBlock(nn.Module):
-    def __init__(self, seq_len, d_model, state_size, device):
+    def __init__(self, seq_len, d_model, state_size, batch_size, device):
         super(MambaBlock, self).__init__()
 
         self.inp_proj = nn.Linear(d_model, 2*d_model, device=device)
@@ -86,13 +84,16 @@ class MambaBlock(nn.Module):
         # For residual skip connection
         self.D = nn.Linear(d_model, 2*d_model, device=device)
 
+        # Batch size
+        self.batch_size = batch_size
+        
         # Set _no_weight_decay attribute on bias
         self.out_proj.bias._no_weight_decay = True
 
         # Initialize bias to a small constant value
         nn.init.constant_(self.out_proj.bias, 1.0)
 
-        self.S6 = S6(seq_len, 2*d_model, state_size, device)
+        self.S6 = S6(seq_len, 2*d_model, state_size, batch_size, device)
 
         # Add 1D convolution with kernel size 3
         self.conv = nn.Conv1d(seq_len, seq_len, kernel_size=3, padding=1, device=device)
@@ -136,11 +137,11 @@ class MambaBlock(nn.Module):
 
     
 class Mamba(nn.Module):
-    def __init__(self, seq_len, d_model, state_size, device):
+    def __init__(self, seq_len, d_model, state_size, batch_size, device):
         super(Mamba, self).__init__()
-        self.mamba_block1 = MambaBlock(seq_len, d_model, state_size, device)
-        self.mamba_block2 = MambaBlock(seq_len, d_model, state_size, device)
-        self.mamba_block3 = MambaBlock(seq_len, d_model, state_size, device)
+        self.mamba_block1 = MambaBlock(seq_len, d_model, state_size, batch_size, device)
+        self.mamba_block2 = MambaBlock(seq_len, d_model, state_size, batch_size, device)
+        self.mamba_block3 = MambaBlock(seq_len, d_model, state_size, batch_size, device)
         
     def forward(self, x):
         x = self.mamba_block1(x)
